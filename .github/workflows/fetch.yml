@@ -9,19 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
       - name: fetch
         run: |
           mkdir -p data
           set +e
-          curl -sSL --max-time 90 "https://r.jina.ai/https://youtubetotranscript.com/transcript?v=B1KJXLW7pKE" -o data/jina_ytt.txt
-          curl -sSL --max-time 90 "https://r.jina.ai/https://www.youtube.com/watch?v=B1KJXLW7pKE" -o data/jina_yt.txt
-          curl -sSL --max-time 90 "https://r.jina.ai/https://youtubetranscript.com/?v=B1KJXLW7pKE" -o data/jina_ytcom.txt
-          curl -sSL --max-time 90 -H "X-Return-Format: text" "https://r.jina.ai/https://inv.nadeko.net/api/v1/captions/B1KJXLW7pKE?label=Hindi%20(auto-generated)" -o data/jina_vtt.txt
-          npx -y get-youtube-transcript B1KJXLW7pKE --lang hi --format json > data/gytt.json 2> data/gytt.log
-          npx -y @nadimtuhin/ytranscript get B1KJXLW7pKE --lang hi --format json > data/ytr.json 2> data/ytr.log
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+          curl -sSL --max-time 60 -A "$UA" "https://youtubetranscribe.khabaroff.studio/transcript/B1KJXLW7pKE?auto=true&timestamps=false" -o data/khab.txt
+          curl -sSL --max-time 60 -A "$UA" "https://yt-transcript.net/B1KJXLW7pKE?fmt=json" -o data/ytt_net.json
+          curl -sSL --max-time 60 -A "$UA" "https://api.webpeel.dev/v1/youtube?url=https://www.youtube.com/watch?v=B1KJXLW7pKE&language=hi" -o data/webpeel.json
+          curl -sSL --max-time 60 -A "$UA" -X POST -H "Content-Type: application/json" -d '{"url":"https://www.youtube.com/watch?v=B1KJXLW7pKE","lang":"hi"}' "https://transcribeyoutube.com/api/transcript" -o data/transcribeyt.json
+          curl -sSL --max-time 60 -A "$UA" -X POST -H "Content-Type: application/json" -d '{"video_id":"B1KJXLW7pKE","format":true}' "https://api.kome.ai/api/tools/youtube-transcripts" -o data/kome.json
+          curl -sSL --max-time 60 -A "$UA" "https://filmot.com/video/B1KJXLW7pKE" -o data/filmot.html
+          curl -sSL --max-time 60 -A "$UA" "https://tactiq-apps-prod.tactiq.io/transcript" -X POST -H "Content-Type: application/json" -d '{"videoUrl":"https://www.youtube.com/watch?v=B1KJXLW7pKE","langCode":"hi"}' -o data/tactiq.json
+          curl -sSL --max-time 60 -A "$UA" "https://youtubetotranscript.com/transcript?v=B1KJXLW7pKE" -o data/ytt2.html
           ls -la data
           wc -c data/*
       - name: commit
@@ -29,5 +29,5 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git config user.name "fetch-bot"
           git add -A
-          git commit -m "fetch data 2" || echo "nothing to commit"
+          git commit -m "fetch data 3" || echo "nothing to commit"
           git push
