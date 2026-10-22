@@ -9,25 +9,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: fetch
         run: |
           mkdir -p data
           set +e
-          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
-          curl -sSL -A "$UA" "https://youtubetotranscript.com/transcript?v=B1KJXLW7pKE" -o data/ytt.html
-          curl -sSL -A "$UA" "https://youtubetranscript.com/?v=B1KJXLW7pKE" -o data/ytcom.html
-          curl -sSL "https://inv.nadeko.net/api/v1/captions/B1KJXLW7pKE" -o data/inv.json
-          curl -sSL "https://inv.nadeko.net/api/v1/captions/B1KJXLW7pKE?label=Hindi%20(auto-generated)" -o data/hi_nadeko.vtt
-          curl -sSL "https://yewtu.be/api/v1/captions/B1KJXLW7pKE?label=Hindi%20(auto-generated)" -o data/hi_yewtu.vtt
-          curl -sSL "https://invidious.nerdvpn.de/api/v1/captions/B1KJXLW7pKE?label=Hindi%20(auto-generated)" -o data/hi_nerd.vtt
-          pip install -q youtube-transcript-api yt-dlp
-          python -c "from youtube_transcript_api import YouTubeTranscriptApi as A; t=A().fetch('B1KJXLW7pKE',languages=['hi']); open('data/api.txt','w').write(chr(10).join(s.text for s in t.snippets))" > data/api.log 2>&1
-          yt-dlp --skip-download --write-auto-subs --sub-langs hi --sub-format vtt -o "data/ytd.%(ext)s" "https://www.youtube.com/watch?v=B1KJXLW7pKE" > data/ytd.log 2>&1
+          curl -sSL --max-time 90 "https://r.jina.ai/https://youtubetotranscript.com/transcript?v=B1KJXLW7pKE" -o data/jina_ytt.txt
+          curl -sSL --max-time 90 "https://r.jina.ai/https://www.youtube.com/watch?v=B1KJXLW7pKE" -o data/jina_yt.txt
+          curl -sSL --max-time 90 "https://r.jina.ai/https://youtubetranscript.com/?v=B1KJXLW7pKE" -o data/jina_ytcom.txt
+          curl -sSL --max-time 90 -H "X-Return-Format: text" "https://r.jina.ai/https://inv.nadeko.net/api/v1/captions/B1KJXLW7pKE?label=Hindi%20(auto-generated)" -o data/jina_vtt.txt
+          npx -y get-youtube-transcript B1KJXLW7pKE --lang hi --format json > data/gytt.json 2> data/gytt.log
+          npx -y @nadimtuhin/ytranscript get B1KJXLW7pKE --lang hi --format json > data/ytr.json 2> data/ytr.log
           ls -la data
+          wc -c data/*
       - name: commit
         run: |
           git config user.email "bot@users.noreply.github.com"
           git config user.name "fetch-bot"
           git add -A
-          git commit -m "fetch data" || echo "nothing to commit"
+          git commit -m "fetch data 2" || echo "nothing to commit"
           git push
